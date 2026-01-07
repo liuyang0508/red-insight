@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>Red Insight - AI 小红书洞察助手</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red-400: #f87171;
+            --red-500: #ef4444;
+            --red-600: #dc2626;
+            --orange-400: #fb923c;
+            --orange-500: #f97316;
+            --amber-400: #fbbf24;
+            --amber-500: #f59e0b;
+            --emerald-400: #34d399;
+            --emerald-500: #10b981;
+            --blue-400: #60a5fa;
+            --blue-500: #3b82f6;
+            --purple-400: #a78bfa;
+            --purple-500: #8b5cf6;
+            --pink-400: #f472b6;
+            --pink-500: #ec4899;
+            --cyan-400: #22d3ee;
+            --cyan-500: #06b6d4;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-850: #172033;
+            --slate-900: #0f172a;
+            --slate-950: #0a0f1a;
+            --gradient-brand: linear-gradient(135deg, #ef4444 0%, #f97316 50%, #fbbf24 100%);
+            --gradient-cool: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --gradient-warm: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, sans-serif;
+            background: linear-gradient(180deg, var(--slate-950) 0%, var(--slate-900) 100%);
+            color: var(--slate-100);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 顶部导航 */
+        header {
+            height: 56px;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(71, 85, 105, 0.5);
+            position: relative;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-brand);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .logo-text {
+            font-size: 1.125rem;
+            font-weight: 700;
+            background: var(--gradient-brand);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-badge {
+            font-size: 0.65rem;
+            background: var(--gradient-cool);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .header-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            background: rgba(71, 85, 105, 0.5);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 8px;
+            color: var(--slate-300);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .header-btn:hover {
+            background: rgba(71, 85, 105, 0.8);
+            border-color: var(--slate-500);
+            color: white;
+        }
+
+        /* 主布局 */
+        .main-layout {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* 左侧面板 */
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        /* 右侧执行日志 */
+        .right-panel {
+            width: 380px;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(8px);
+            border-left: 1px solid rgba(71, 85, 105, 0.4);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(71, 85, 105, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        .panel-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel-badge {
+            font-size: 0.7rem;
+            background: rgba(71, 85, 105, 0.6);
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            color: var(--slate-400);
+        }
+
+        /* 执行日志 */
+        .log-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            line-height: 1.5;
+        }
+
+        .log-empty {
+            color: var(--slate-500);
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .log-item {
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            border-radius: 8px;
+            animation: logSlideIn 0.3s ease;
+        }
+
+        @keyframes logSlideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .log-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .log-icon { font-size: 0.9rem; }
+        .log-title { font-weight: 500; color: var(--slate-200); flex: 1; font-size: 0.8rem; }
+
+        .log-status {
+            font-size: 0.65rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 3px;
+        }
+
+        .log-status.running { background: rgba(59, 130, 246, 0.2); color: var(--blue-400); }
+        .log-status.completed { background: rgba(16, 185, 129, 0.2); color: var(--emerald-400); }
+        .log-status.error { background: rgba(239, 68, 68, 0.2); color: var(--red-400); }
+
+        .log-content { color: var(--slate-400); font-size: 0.7rem; }
+
+        .log-data {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 4px;
+            padding: 0.4rem;
+            margin-top: 0.4rem;
+            font-size: 0.65rem;
+        }
+
+        .log-data-row { display: flex; gap: 0.4rem; margin-bottom: 0.15rem; }
+        .log-key { color: var(--purple-400); }
+        .log-value { color: var(--emerald-400); word-break: break-all; }
+
+        /* 内容区 */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .content-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* 欢迎页面 */
+        .welcome {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            text-align: center;
+            animation: welcomeFadeIn 0.6s ease;
+        }
+
+        @keyframes welcomeFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-brand);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 60px rgba(239, 68, 68, 0.4);
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(239, 68, 68, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 80px rgba(239, 68, 68, 0.5); }
+        }
+
+        .welcome h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            background: var(--gradient-brand);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome p {
+            color: var(--slate-400);
+            margin-bottom: 2.5rem;
+            max-width: 500px;
+            line-height: 1.6;
+        }
+
+        /* 功能卡片 */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+            max-width: 800px;
+        }
+
+        .feature-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            border-radius: 12px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .feature-card:hover {
+            background: rgba(51, 65, 85, 0.6);
+            border-color: rgba(100, 116, 139, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--slate-100);
+        }
+
+        .feature-desc {
+            font-size: 0.8rem;
+            color: var(--slate-400);
+        }
+
+        /* 快捷按钮 */
+        .quick-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .quick-btn {
+            padding: 0.6rem 1.25rem;
+            font-size: 0.85rem;
+            background: rgba(51, 65, 85, 0.5);
+            border: 1px solid rgba(71, 85, 105, 0.4);
+            border-radius: 20px;
+            color: var(--slate-300);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .quick-btn:hover {
+            background: rgba(71, 85, 105, 0.6);
+            border-color: var(--slate-500);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* 报告区域 */
+        .report {
+            display: none;
+            animation: reportFadeIn 0.5s ease;
+        }
+
+        .report.active { display: block; }
+
+        @keyframes reportFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .report-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(71, 85, 105, 0.4);
+        }
+
+        .report-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .report-keyword {
+            background: var(--gradient-brand);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .report-meta {
+            font-size: 0.85rem;
+            color: var(--slate-400);
+        }
+
+        .report-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .report-tab {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            background: rgba(51, 65, 85, 0.4);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            border-radius: 8px;
+            color: var(--slate-400);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .report-tab:hover, .report-tab.active {
+            background: rgba(71, 85, 105, 0.6);
+            border-color: var(--slate-500);
+            color: white;
+        }
+
+        .report-tab.active {
+            background: var(--gradient-brand);
+            border-color: transparent;
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-brand);
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: var(--gradient-brand);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--slate-400);
+            margin-top: 0.25rem;
+        }
+
+        /* 章节标题 */
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* 榜单样式 */
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ranking-item:hover {
+            background: rgba(51, 65, 85, 0.6);
+            transform: translateX(4px);
+        }
+
+        .ranking-rank {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .ranking-rank.top1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1e293b; }
+        .ranking-rank.top2 { background: linear-gradient(135deg, #94a3b8, #64748b); color: white; }
+        .ranking-rank.top3 { background: linear-gradient(135deg, #f97316, #ea580c); color: white; }
+        .ranking-rank.normal { background: rgba(71, 85, 105, 0.5); color: var(--slate-300); }
+
+        .ranking-content { flex: 1; }
+        .ranking-title { font-size: 0.95rem; font-weight: 500; margin-bottom: 0.25rem; }
+        .ranking-meta { font-size: 0.8rem; color: var(--slate-400); display: flex; gap: 1rem; }
+
+        .ranking-score {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .ranking-trend { font-size: 0.85rem; }
+        .ranking-trend.up { color: var(--emerald-400); }
+        .ranking-trend.down { color: var(--red-400); }
+        .ranking-trend.new { color: var(--cyan-400); }
+
+        /* 帖子网格 */
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .post-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .post-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(100, 116, 139, 0.5);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .post-cover {
+            height: 160px;
+            background: linear-gradient(135deg, var(--slate-700), var(--slate-600));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            overflow: hidden;
+        }
+
+        .post-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .post-info { padding: 1rem; }
+
+        .post-title {
+            font-size: 0.95rem;
+            font-weight: 500;
+            line-height: 1.4;
+            margin-bottom: 0.75rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--slate-400);
+        }
+
+        .post-author {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .post-avatar {
+            width: 20px;
+            height: 20px;
+            background: var(--gradient-brand);
+            border-radius: 50%;
+            font-size: 0.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        /* 攻略样式 */
+        .guide-container {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .guide-header {
+            padding: 1.5rem;
+            background: var(--gradient-brand);
+            color: white;
+        }
+
+        .guide-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .guide-subtitle { font-size: 0.9rem; opacity: 0.9; }
+
+        .guide-summary {
+            padding: 1.5rem;
+            background: rgba(15, 23, 42, 0.4);
+            border-bottom: 1px solid rgba(71, 85, 105, 0.3);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--slate-300);
+        }
+
+        .guide-sections { padding: 1.5rem; }
+
+        .guide-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(71, 85, 105, 0.3);
+        }
+
+        .guide-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+        .guide-section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .guide-section-content {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: var(--slate-300);
+        }
+
+        .guide-tips {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid var(--blue-500);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .guide-tips-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--blue-400);
+            margin-bottom: 0.5rem;
+        }
+
+        .guide-tips-list {
+            list-style: none;
+            font-size: 0.85rem;
+            color: var(--slate-300);
+        }
+
+        .guide-tips-list li {
+            padding: 0.25rem 0;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .guide-tips-list li::before {
+            content: '💡';
+            position: absolute;
+            left: 0;
+            font-size: 0.7rem;
+        }
+
+        .guide-keypoints {
+            padding: 1.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-top: 1px solid rgba(71, 85, 105, 0.3);
+        }
+
+        .guide-keypoints-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--emerald-400);
+            margin-bottom: 1rem;
+        }
+
+        .guide-keypoints-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .guide-keypoint {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--slate-300);
+        }
+
+        .guide-keypoint::before {
+            content: '✓';
+            color: var(--emerald-400);
+            font-weight: bold;
+        }
+
+        .guide-warnings {
+            padding: 1.5rem;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .guide-warnings-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--red-400);
+            margin-bottom: 1rem;
+        }
+
+        .guide-warning-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--slate-300);
+            margin-bottom: 0.5rem;
+        }
+
+        .guide-warning-item::before {
+            content: '⚠️';
+            font-size: 0.8rem;
+        }
+
+        /* 统计图表区域 */
+        .chart-container {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        /* 简单条形图 */
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bar-label {
+            width: 80px;
+            font-size: 0.8rem;
+            color: var(--slate-400);
+            text-align: right;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 24px;
+            background: rgba(51, 65, 85, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: var(--gradient-brand);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            padding-left: 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: white;
+            transition: width 0.5s ease;
+        }
+
+        /* 热词云 */
+        .hotwords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .hotword {
+            padding: 0.4rem 0.8rem;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .hotword:hover { transform: scale(1.05); }
+        .hotword.large { font-size: 1rem; padding: 0.5rem 1rem; background: var(--gradient-brand); color: white; }
+        .hotword.medium { font-size: 0.9rem; background: rgba(139, 92, 246, 0.3); color: var(--purple-400); }
+        .hotword.small { font-size: 0.8rem; background: rgba(71, 85, 105, 0.5); color: var(--slate-300); }
+
+        /* 洞察卡片 */
+        .insights-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(71, 85, 105, 0.3);
+            font-size: 0.9rem;
+            color: var(--slate-300);
+            line-height: 1.5;
+        }
+
+        .insight-item:last-child { border-bottom: none; }
+
+        /* 分析卡片 */
+        .analysis-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .analysis-content {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: var(--slate-300);
+        }
+
+        /* 输入区 */
+        .input-area {
+            padding: 1rem 2rem 1.5rem;
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(71, 85, 105, 0.4);
+        }
+
+        .input-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 1rem 1.25rem;
+            font-size: 0.95rem;
+            font-family: inherit;
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.8);
+            color: white;
+            outline: none;
+            resize: none;
+            min-height: 52px;
+            max-height: 120px;
+            transition: all 0.2s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--red-500);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+        }
+
+        .chat-input::placeholder { color: var(--slate-500); }
+
+        .send-btn {
+            width: 52px;
+            height: 52px;
+            border: none;
+            background: var(--gradient-brand);
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .send-btn .spinner {
+            width: 22px;
+            height: 22px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        .send-btn.loading .spinner { display: block; }
+        .send-btn.loading .send-icon { display: none; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .right-panel { width: 320px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .right-panel { display: none; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .posts-grid { grid-template-columns: 1fr; }
+            .feature-grid { grid-template-columns: 1fr; }
+        }
+
+        /* 滚动条 */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.5); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.7); }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">📕</div>
+            <span class="logo-text">Red Insight</span>
+            <span class="logo-badge">AI Agent v3</span>
+        </div>
+        <div class="header-actions">
+        <button class="header-btn" onclick="clearAll()">🔄 重新开始</button>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <div class="left-panel">
+            <div class="content-area" id="contentArea">
+                <div class="content-wrapper">
+                    <!-- 欢迎页面 -->
+                    <div class="welcome" id="welcome">
+                        <div class="welcome-icon">🔍</div>
+                        <h1>小红书智能洞察</h1>
+                        <p>告诉我你想了解的话题，AI Agent 将自动抓取小红书内容，生成榜单分析、地区统计、智能攻略等可视化报告</p>
+                        
+                        <div class="feature-grid">
+                            <div class="feature-card" onclick="search('看看美妆榜有什么热门的')">
+                                <div class="feature-icon">📊</div>
+                                <div class="feature-title">榜单分析</div>
+                                <div class="feature-desc">热门榜、美妆榜、穿搭榜等</div>
+                            </div>
+                            <div class="feature-card" onclick="search('上海有什么好吃的推荐')">
+                                <div class="feature-icon">🏙️</div>
+                                <div class="feature-title">地区统计</div>
+                                <div class="feature-desc">城市热门内容分析</div>
+                            </div>
+                            <div class="feature-card" onclick="search('帮我生成杭州旅游攻略')">
+                                <div class="feature-icon">📖</div>
+                                <div class="feature-title">智能攻略</div>
+                                <div class="feature-desc">游玩、购买、避坑指南</div>
+                            </div>
+                            <div class="feature-card" onclick="search('分析一下护肤品的数据统计')">
+                                <div class="feature-icon">📈</div>
+                                <div class="feature-title">统计报表</div>
+                                <div class="feature-desc">互动分析、热词统计</div>
+                            </div>
+                        </div>
+                        
+                        <div class="quick-btns">
+                            <button class="quick-btn" onclick="search('咖啡探店有什么推荐')">☕ 咖啡探店</button>
+                            <button class="quick-btn" onclick="search('穿搭榜最近流行什么')">👗 穿搭趋势</button>
+                            <button class="quick-btn" onclick="search('健身减脂有什么好的经验')">💪 健身攻略</button>
+                            <button class="quick-btn" onclick="search('面膜避坑指南')">⚠️ 避坑指南</button>
+                        </div>
+                    </div>
+
+                    <!-- 报告区域 -->
+                    <div class="report" id="report"></div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-container">
+                    <textarea class="chat-input" id="input" placeholder="输入你想了解的内容，如「看看美妆榜」「上海美食推荐」「杭州旅游攻略」..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();search()}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+                    <button class="send-btn" id="sendBtn" onclick="search()">
+                        <span class="send-icon">→</span>
+                        <div class="spinner"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧执行日志 -->
+        <div class="right-panel">
+            <div class="panel-header">
+                <div class="panel-title">⚡ Agent 执行日志</div>
+                <span class="panel-badge" id="stepCount">等待执行</span>
+            </div>
+            <div class="log-container" id="logContainer">
+                <div class="log-empty" id="logEmpty">
+                    <p>🤖 执行日志将在这里显示</p>
+                    <p style="font-size: 0.7rem; margin-top: 0.5rem; color: var(--slate-600)">
+                        包括：意图理解 → 功能调度 → 数据抓取 → AI 分析 → 报告生成
+                    </p>
+                </div>
+                <div id="logList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isLoading = false;
+        const sessionId = 'session_' + Date.now();
+
+        async function search(text) {
+            const input = document.getElementById('input');
+            const message = text || input.value.trim();
+            if (!message || isLoading) return;
+
+            document.getElementById('welcome').style.display = 'none';
+            document.getElementById('report').classList.add('active');
+            document.getElementById('logEmpty').style.display = 'none';
+            document.getElementById('logList').innerHTML = '';
+            document.getElementById('report').innerHTML = '<div style="text-align:center;padding:3rem;color:var(--slate-400)"><div class="spinner" style="display:inline-block;width:32px;height:32px;border:3px solid rgba(255,255,255,0.2);border-top-color:var(--red-500);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:1rem"></div><br>正在处理请求...</div>';
+            
+            input.value = '';
+            input.style.height = 'auto';
+            setLoading(true);
+            
+            addLog('thinking', '🧠', '理解用户意图', `分析输入：「${message.slice(0, 30)}${message.length > 30 ? '...' : ''}」`, 'running');
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, session_id: sessionId })
+                });
+
+                if (!res.ok) throw new Error('请求失败');
+                const data = await res.json();
+
+                renderLogs(data.steps);
+                    renderReport(data);
+
+            } catch (err) {
+                console.error(err);
+                addLog('error', '❌', '执行失败', err.message, 'error');
+                document.getElementById('report').innerHTML = `<div style="text-align:center;padding:3rem;color:var(--red-400)">❌ ${err.message}</div>`;
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function addLog(type, icon, title, content, status, data) {
+            const list = document.getElementById('logList');
+            const statusText = { running: '执行中', completed: '完成', error: '失败' }[status] || status;
+
+            list.innerHTML += `
+                <div class="log-item">
+                    <div class="log-header">
+                        <span class="log-icon">${icon}</span>
+                        <span class="log-title">${title}</span>
+                        <span class="log-status ${status}">${statusText}</span>
+                    </div>
+                    <div class="log-content">${content}</div>
+                </div>
+            `;
+            
+            document.getElementById('stepCount').textContent = `${list.children.length} 步`;
+            list.scrollTop = list.scrollHeight;
+        }
+
+        function renderLogs(steps) {
+            const list = document.getElementById('logList');
+            list.innerHTML = '';
+
+            const icons = {
+                thinking: '🧠', extract_keywords: '🏷️', searching: '🔍',
+                fetching: '📥', analyzing: '📊', ranking: '🏆',
+                regional: '🏙️', guide: '📖', complete: '✅', error: '❌'
+            };
+
+            if (steps) {
+                steps.forEach(step => {
+                    const icon = icons[step.action] || '⚙️';
+                    const statusText = { running: '执行中', completed: '完成', error: '失败' }[step.status];
+                    
+                    let dataHtml = '';
+                    if (step.data && Object.keys(step.data).length > 0) {
+                        dataHtml = '<div class="log-data">';
+                        for (const [k, v] of Object.entries(step.data)) {
+                            let val = Array.isArray(v) ? v.slice(0, 3).join(', ') : (typeof v === 'object' ? JSON.stringify(v) : v);
+                            if (String(val).length > 50) val = val.slice(0, 50) + '...';
+                            dataHtml += `<div class="log-data-row"><span class="log-key">${k}:</span> <span class="log-value">${val}</span></div>`;
+                        }
+                        dataHtml += '</div>';
+                    }
+
+                    list.innerHTML += `
+                        <div class="log-item">
+                            <div class="log-header">
+                                <span class="log-icon">${icon}</span>
+                                <span class="log-title">Step ${step.step}: ${step.title}</span>
+                                <span class="log-status ${step.status}">${statusText}</span>
+                            </div>
+                            <div class="log-content">${step.description}</div>
+                            ${dataHtml}
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('stepCount').textContent = `${steps ? steps.length : 0} 步完成`;
+        }
+
+        function renderReport(data) {
+            let html = '';
+            
+            // 报告头部
+            const keyword = data.keywords?.[0] || '分析结果';
+            html += `
+                <div class="report-header">
+                    <h2 class="report-title">
+                        ${getActionIcon(data.action)} 「<span class="report-keyword">${escapeHtml(keyword)}</span>」${getActionLabel(data.action)}
+                    </h2>
+                    <p class="report-meta">
+                        生成时间: ${new Date(data.timestamp).toLocaleString('zh-CN')} | 
+                        ${data.posts ? `共抓取 ${data.posts.length} 条内容` : ''}
+                    </p>
+                </div>
+            `;
+
+            // 根据不同的 action 渲染不同内容
+            let hasSpecialContent = false;
+            
+            if (data.guide) {
+                html += renderGuide(data.guide);
+                hasSpecialContent = true;
+            }
+            
+            if (data.ranking) {
+                html += renderRanking(data.ranking);
+                hasSpecialContent = true;
+            }
+            
+            if (data.regional) {
+                html += renderRegional(data.regional);
+                hasSpecialContent = true;
+            }
+            
+            if (data.statistics && !data.regional) {
+                // 避免重复渲染（regional 已经包含了部分统计）
+                html += renderStatistics(data.statistics);
+                hasSpecialContent = true;
+            }
+            
+            if (data.comparison) {
+                html += renderComparison(data.comparison);
+                hasSpecialContent = true;
+            }
+            
+            // 如果有帖子数据，总是显示帖子列表
+            if (data.posts && data.posts.length > 0) {
+                // 如果没有特殊内容，显示完整的默认报告
+                if (!hasSpecialContent) {
+                    html += renderDefaultReport(data);
+                } else {
+                    // 如果有特殊内容，在后面追加帖子列表（避免 regional 重复显示）
+                    if (!data.regional) {
+                        html += `
+                            <div class="section" style="margin-top:2rem">
+                                <h3 class="section-title">📚 抓取的小红书帖子</h3>
+                                <div class="posts-grid">
+                                    ${data.posts.map(p => renderPostCard(p)).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    // 如果有 AI 分析，也显示
+                    if (data.analysis) {
+                        html += `
+                            <div class="section" style="margin-top:2rem">
+                                <h3 class="section-title">🤖 AI 智能分析</h3>
+                                <div class="analysis-card">
+                                    <div class="analysis-content">${formatText(data.analysis)}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            } else if (!hasSpecialContent) {
+                // 纯对话响应
+                html += `
+                    <div style="text-align:center;padding:2rem;">
+                        <div style="font-size:3rem;margin-bottom:1rem;">💬</div>
+                        <div style="font-size:1.1rem;color:var(--slate-200);margin-bottom:0.5rem;line-height:1.6;">${formatText(data.message)}</div>
+                        ${data.suggestions ? `<div style="margin-top:1.5rem;display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap">${data.suggestions.map(s => `<button class="quick-btn" onclick="search('${escapeHtml(s)}')">${escapeHtml(s)}</button>`).join('')}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            document.getElementById('report').innerHTML = html;
+            document.getElementById('contentArea').scrollTop = 0;
+        }
+
+        function renderGuide(guide) {
+            let html = `
+                <div class="guide-container">
+                    <div class="guide-header">
+                        <h3 class="guide-title">${escapeHtml(guide.title)}</h3>
+                        <p class="guide-subtitle">${escapeHtml(guide.subtitle)} | 来源: ${guide.source_posts_count} 篇热门内容</p>
+                    </div>
+                    
+                    ${guide.summary ? `<div class="guide-summary">${escapeHtml(guide.summary)}</div>` : ''}
+                    
+                    <div class="guide-sections">
+            `;
+            
+            // 渲染章节
+            if (guide.sections) {
+                guide.sections.forEach((section, i) => {
+                    html += `
+                        <div class="guide-section">
+                            <h4 class="guide-section-title">${getSectionEmoji(i)} ${escapeHtml(section.title)}</h4>
+                            <div class="guide-section-content">${formatText(section.content)}</div>
+                            ${section.tips && section.tips.length > 0 ? `
+                                <div class="guide-tips">
+                                    <div class="guide-tips-title">小贴士</div>
+                                    <ul class="guide-tips-list">
+                                        ${section.tips.map(tip => `<li>${escapeHtml(tip)}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+            }
+            
+            html += '</div>';
+            
+            // 要点总结
+            if (guide.key_points && guide.key_points.length > 0) {
+                html += `
+                    <div class="guide-keypoints">
+                        <div class="guide-keypoints-title">📌 核心要点</div>
+                        <div class="guide-keypoints-list">
+                            ${guide.key_points.map(p => `<div class="guide-keypoint">${escapeHtml(p)}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 注意事项
+            if (guide.warnings && guide.warnings.length > 0) {
+                html += `
+                    <div class="guide-warnings">
+                        <div class="guide-warnings-title">⚠️ 注意事项</div>
+                        ${guide.warnings.map(w => `<div class="guide-warning-item">${escapeHtml(w)}</div>`).join('')}
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            
+            // 推荐列表
+            if (guide.recommendations && guide.recommendations.length > 0) {
+                html += `
+                    <div class="section" style="margin-top:2rem">
+                        <h3 class="section-title">💎 推荐列表</h3>
+                        <div class="ranking-list">
+                            ${guide.recommendations.map((rec, i) => `
+                                <div class="ranking-item">
+                                    <div class="ranking-rank ${i < 3 ? 'top' + (i+1) : 'normal'}">${i + 1}</div>
+                                    <div class="ranking-content">
+                                        <div class="ranking-title">${escapeHtml(rec.name)}</div>
+                                        <div class="ranking-meta">
+                                            <span>${escapeHtml(rec.reason || rec.detail || '')}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return html;
+        }
+
+        function renderRanking(ranking) {
+            let html = `
+                <div class="section">
+                    <h3 class="section-title">${ranking.title}</h3>
+                    <p style="color:var(--slate-400);margin-bottom:1rem;font-size:0.9rem">${ranking.description}</p>
+                    
+                    <div class="ranking-list">
+            `;
+            
+            if (ranking.items) {
+                ranking.items.forEach((item, i) => {
+                    const post = item.post || {};
+                    const trendIcon = { up: '📈', down: '📉', stable: '➡️', new: '🆕' }[item.trend] || '';
+                    
+                    html += `
+                        <div class="ranking-item" onclick="window.open('${post.url || '#'}', '_blank')">
+                            <div class="ranking-rank ${i < 3 ? 'top' + (i+1) : 'normal'}">${item.rank}</div>
+                            <div class="ranking-content">
+                                <div class="ranking-title">${escapeHtml(post.title || '无标题')}</div>
+                                <div class="ranking-meta">
+                                    <span>👤 ${escapeHtml(post.author || '未知')}</span>
+                                    <span>❤️ ${post.likes || 0}</span>
+                                    <span>💬 ${post.comments || 0}</span>
+                                </div>
+                            </div>
+                            <div class="ranking-score">
+                                <span class="ranking-trend ${item.trend}">${trendIcon}</span>
+                                <span style="color:var(--amber-400);font-weight:600">${formatNum(item.score)}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            html += '</div></div>';
+            
+            // 统计卡片
+            html += `
+                <div class="stats-grid" style="margin-top:2rem">
+                    <div class="stat-card">
+                        <div class="stat-value">${ranking.items?.length || 0}</div>
+                        <div class="stat-label">上榜内容</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${formatNum(ranking.total_engagement || 0)}</div>
+                        <div class="stat-label">总热度</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${formatNum(ranking.avg_score || 0)}</div>
+                        <div class="stat-label">平均热度</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${ranking.ranking_type || 'hot'}</div>
+                        <div class="stat-label">榜单类型</div>
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        }
+
+        function renderRegional(regional) {
+            let html = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${regional.city_emoji} ${regional.city}</div>
+                        <div class="stat-label">分析城市</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${regional.total_posts || 0}</div>
+                        <div class="stat-label">相关帖子</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${formatNum(regional.total_engagement || 0)}</div>
+                        <div class="stat-label">总互动</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${formatNum(regional.avg_engagement || 0)}</div>
+                        <div class="stat-label">平均互动</div>
+                    </div>
+                </div>
+            `;
+            
+            // 热门话题
+            if (regional.hot_topics && regional.hot_topics.length > 0) {
+                html += `
+                    <div class="section">
+                        <h3 class="section-title">🔥 热门话题</h3>
+                        <div class="hotwords">
+                            ${regional.hot_topics.map((t, i) => `
+                                <span class="hotword ${i < 2 ? 'large' : (i < 5 ? 'medium' : 'small')}" onclick="search('${regional.city} ${t.topic}')">
+                                    ${t.topic} <span style="opacity:0.7">${t.count}</span>
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 特色美食
+            if (regional.specialties_mentioned && regional.specialties_mentioned.length > 0) {
+                html += `
+                    <div class="section">
+                        <h3 class="section-title">🍜 提及的特色美食</h3>
+                        <div class="hotwords">
+                            ${regional.specialties_mentioned.map(s => `<span class="hotword medium">${s}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 帖子列表
+            if (regional.posts && regional.posts.length > 0) {
+                html += `
+                    <div class="section">
+                        <h3 class="section-title">📚 相关内容</h3>
+                        <div class="posts-grid">
+                            ${regional.posts.slice(0, 6).map(p => renderPostCard(p)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 活跃作者
+            if (regional.top_authors && regional.top_authors.length > 0) {
+                html += `
+                    <div class="section">
+                        <h3 class="section-title">👑 活跃创作者</h3>
+                        <div class="ranking-list">
+                            ${regional.top_authors.slice(0, 5).map((a, i) => `
+                                <div class="ranking-item">
+                                    <div class="ranking-rank ${i < 3 ? 'top' + (i+1) : 'normal'}">${i + 1}</div>
+                                    <div class="ranking-content">
+                                        <div class="ranking-title">${escapeHtml(a.author)}</div>
+                                        <div class="ranking-meta">
+                                            <span>📝 ${a.posts_count} 篇</span>
+                                            <span>❤️ ${formatNum(a.total_likes)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return html;
+        }
+
+        function renderStatistics(stats) {
+            let html = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.total_posts}</div>
+                        <div class="stat-label">分析帖子</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${formatNum(stats.total_likes)}</div>
+                        <div class="stat-label">总点赞</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${formatNum(stats.total_comments)}</div>
+                        <div class="stat-label">总评论</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${formatNum(stats.avg_engagement)}</div>
+                        <div class="stat-label">平均互动</div>
+                    </div>
+                </div>
+            `;
+            
+            // 互动分布
+            if (stats.engagement_distribution && stats.engagement_distribution.length > 0) {
+                html += `
+                    <div class="chart-container">
+                        <div class="chart-title">📊 互动分布</div>
+                        <div class="bar-chart">
+                            ${stats.engagement_distribution.map(d => `
+                                <div class="bar-item">
+                                    <div class="bar-label">${d.range_label}</div>
+                                    <div class="bar-track">
+                                        <div class="bar-fill" style="width:${Math.min(d.percentage * 2, 100)}%">
+                                            ${d.count} 篇 (${d.percentage}%)
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 热词分析
+            if (stats.hot_words && stats.hot_words.length > 0) {
+                html += `
+                    <div class="section">
+                        <h3 class="section-title">🔤 热词分析</h3>
+                        <div class="hotwords">
+                            ${stats.hot_words.slice(0, 20).map((hw, i) => `
+                                <span class="hotword ${i < 3 ? 'large' : (i < 8 ? 'medium' : 'small')}" onclick="search('${hw.word}')">
+                                    ${hw.word}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 洞察
+            if (stats.insights && stats.insights.length > 0) {
+                html += `
+                    <div class="section">
+                        <h3 class="section-title">💡 数据洞察</h3>
+                        <div class="insights-card">
+                            ${stats.insights.map(insight => `<div class="insight-item">${insight}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 质量评分
+            if (stats.quality_scores && stats.quality_scores.length > 0) {
+                html += `
+                    <div class="section">
+                        <h3 class="section-title">⭐ 内容质量评分</h3>
+                        <div class="ranking-list">
+                            ${stats.quality_scores.slice(0, 5).map((q, i) => `
+                                <div class="ranking-item">
+                                    <div class="ranking-rank ${i < 3 ? 'top' + (i+1) : 'normal'}">${i + 1}</div>
+                                    <div class="ranking-content">
+                                        <div class="ranking-title">${escapeHtml(q.post_title)}</div>
+                                        <div class="ranking-meta">
+                                            <span>互动分 ${q.engagement_score}</span>
+                                            <span>内容分 ${q.content_score}</span>
+                                            <span>传播力 ${q.viral_potential}</span>
+                                        </div>
+                                    </div>
+                                    <div class="ranking-score">
+                                        <span style="color:var(--amber-400);font-weight:700;font-size:1.1rem">${q.total_score}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return html;
+        }
+
+        function renderComparison(comparison) {
+            let html = `
+                <div class="section">
+                    <h3 class="section-title">⚖️ 对比分析</h3>
+            `;
+            
+            if (comparison.summary) {
+                html += `<p style="color:var(--slate-300);margin-bottom:1.5rem;line-height:1.6">${formatText(comparison.summary)}</p>`;
+            }
+            
+            if (comparison.items && comparison.items.length > 0) {
+                html += '<div class="ranking-list">';
+                comparison.items.forEach((item, i) => {
+                    const isWinner = item.name === comparison.winner;
+                    html += `
+                        <div class="ranking-item" style="${isWinner ? 'border-color:var(--amber-500);' : ''}">
+                            <div class="ranking-rank ${i === 0 ? 'top1' : (i === 1 ? 'top2' : 'normal')}">${i + 1}</div>
+                            <div class="ranking-content">
+                                <div class="ranking-title">${escapeHtml(item.name)} ${isWinner ? '👑' : ''}</div>
+                                <div class="ranking-meta">
+                                    ${item.pros ? `<span style="color:var(--emerald-400)">✓ ${item.pros.slice(0, 2).join(', ')}</span>` : ''}
+                                </div>
+                                ${item.cons ? `<div style="margin-top:0.25rem;font-size:0.8rem;color:var(--red-400)">✗ ${item.cons.slice(0, 2).join(', ')}</div>` : ''}
+                            </div>
+                            <div class="ranking-score">
+                                <span style="color:var(--amber-400);font-weight:700;font-size:1.1rem">${item.score || '-'}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            
+            return html;
+        }
+
+        function renderDefaultReport(data) {
+            let totalLikes = 0, totalComments = 0;
+            data.posts.forEach(p => {
+                totalLikes += parseNum(p.likes);
+                totalComments += parseNum(p.comments);
+            });
+            const avg = data.posts.length ? Math.round((totalLikes + totalComments) / data.posts.length) : 0;
+
+            let html = `
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-value">${data.posts.length}</div><div class="stat-label">抓取帖子</div></div>
+                    <div class="stat-card"><div class="stat-value">${formatNum(totalLikes)}</div><div class="stat-label">总点赞</div></div>
+                    <div class="stat-card"><div class="stat-value">${formatNum(totalComments)}</div><div class="stat-label">总评论</div></div>
+                    <div class="stat-card"><div class="stat-value">${formatNum(avg)}</div><div class="stat-label">平均互动</div></div>
+                </div>
+            `;
+            
+            // 统计数据
+            if (data.statistics) {
+                html += renderStatistics(data.statistics);
+            }
+
+            // 帖子列表
+            html += `
+                <div class="section">
+                <h3 class="section-title">📚 抓取的帖子内容</h3>
+                <div class="posts-grid">
+                        ${data.posts.map(p => renderPostCard(p)).join('')}
+                    </div>
+                </div>
+            `;
+
+            // AI 分析
+            if (data.analysis) {
+                html += `
+                    <div class="section">
+                        <h3 class="section-title">📊 AI 智能分析</h3>
+                        <div class="analysis-card">
+                            <div class="analysis-content">${formatText(data.analysis)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return html;
+        }
+
+        function renderPostCard(p) {
+            // 生成 SVG 占位图（渐变色背景 + 图标）
+            const colors = [
+                ['#ef4444', '#f97316'], ['#f97316', '#fbbf24'], ['#10b981', '#06b6d4'],
+                ['#3b82f6', '#8b5cf6'], ['#8b5cf6', '#ec4899'], ['#ec4899', '#ef4444'],
+                ['#06b6d4', '#3b82f6'], ['#fbbf24', '#10b981']
+            ];
+            const colorIndex = (p.id || p.title || '').length % colors.length;
+            const [c1, c2] = colors[colorIndex];
+            
+            const placeholderSvg = `data:image/svg+xml,${encodeURIComponent(`
+                <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+                    <defs>
+                        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:${c1}"/>
+                            <stop offset="100%" style="stop-color:${c2}"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="400" height="300" fill="url(#g)"/>
+                    <text x="200" y="150" text-anchor="middle" dominant-baseline="middle" font-size="48" fill="white" opacity="0.8">📷</text>
+                </svg>
+            `)}`;
+            
+            const hasCover = p.cover_image && p.cover_image.trim() !== '';
+            
+            return `
+                <article class="post-card" onclick="window.open('${p.url || '#'}', '_blank')">
+                    <div class="post-cover" style="${!hasCover ? `background: linear-gradient(135deg, ${c1}, ${c2})` : ''}">
+                        ${hasCover ? `
+                            <img src="${p.cover_image}" 
+                                 referrerpolicy="no-referrer"
+                                 onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\\'font-size:3rem\\'>📷</div>';" 
+                                 loading="lazy"
+                                 alt="">
+                        ` : `<div style="font-size:3rem;opacity:0.8">📷</div>`}
+                            </div>
+                            <div class="post-info">
+                        <h4 class="post-title">${escapeHtml(p.title || '无标题')}</h4>
+                                <div class="post-meta">
+                                    <div class="post-author">
+                                        <span class="post-avatar">${(p.author || '?')[0]}</span>
+                                        <span>${escapeHtml(p.author || '小红书用户')}</span>
+                                    </div>
+                                    <div>❤️ ${p.likes || 0} · 💬 ${p.comments || 0}</div>
+                                </div>
+                            </div>
+                        </article>
+            `;
+        }
+
+        function getActionIcon(action) {
+            const icons = {
+                ranking: '🏆', regional: '🏙️', guide: '📖',
+                statistics: '📈', compare: '⚖️', search: '🔍'
+            };
+            return icons[action] || '📊';
+        }
+
+        function getActionLabel(action) {
+            const labels = {
+                ranking: '榜单', regional: '地区分析', guide: '攻略',
+                statistics: '统计分析', compare: '对比分析', search: '搜索结果'
+            };
+            return labels[action] || '洞察报告';
+        }
+
+        function getSectionEmoji(index) {
+            const emojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
+            return emojis[index] || '▪️';
+        }
+
+        function setLoading(loading) {
+            isLoading = loading;
+            const btn = document.getElementById('sendBtn');
+            btn.disabled = loading;
+            btn.classList.toggle('loading', loading);
+        }
+
+        function clearAll() {
+            document.getElementById('report').innerHTML = '';
+            document.getElementById('report').classList.remove('active');
+            document.getElementById('welcome').style.display = 'flex';
+            document.getElementById('logList').innerHTML = '';
+            document.getElementById('logEmpty').style.display = 'block';
+            document.getElementById('stepCount').textContent = '等待执行';
+            fetch(`/api/clear-session?session_id=${sessionId}`, { method: 'POST' }).catch(() => {});
+        }
+
+        function escapeHtml(t) {
+            if (!t) return '';
+            const d = document.createElement('div');
+            d.textContent = t;
+            return d.innerHTML;
+        }
+
+        function formatText(t) {
+            if (!t) return '';
+            return t.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        }
+
+        function parseNum(s) {
+            if (!s) return 0;
+            s = String(s);
+            if (s.includes('w') || s.includes('万')) return parseFloat(s) * 10000;
+            if (s.includes('k')) return parseFloat(s) * 1000;
+            return parseInt(s.replace(/\D/g, '')) || 0;
+        }
+
+        function formatNum(n) {
+            if (typeof n === 'string') n = parseFloat(n) || 0;
+            if (n >= 10000) return (n / 10000).toFixed(1) + 'w';
+            if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+            return Math.round(n).toString();
+        }
+    </script>
+</body>
+</html>

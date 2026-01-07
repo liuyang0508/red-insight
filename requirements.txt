@@ -1,0 +1,17 @@
+# FastAPI 后端
+fastapi>=0.110.0
+uvicorn>=0.27.0
+pydantic>=2.6.0
+python-multipart>=0.0.7
+aiofiles>=23.2.1
+
+# 网页抓取
+playwright>=1.41.0
+beautifulsoup4>=4.12.3
+httpx>=0.26.0
+
+# AI Agent
+openai>=1.0.0
+
+# 模板引擎
+jinja2>=3.1.3
