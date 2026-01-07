@@ -8,16 +8,20 @@ Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查�
 '''
 """
 Red Insight 配置文件
+
+敏感信息通过环境变量配置，请参考 .env.example 创建 .env 文件
 """
+import os
 
 # ========== AI 模型配置 ==========
 
 # 阿里云百炼（通义千问）API 配置
-OPENAI_API_KEY = "sk-b859edf6ea854f8a963acb255c3225e0"
-OPENAI_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+# 从环境变量读取，支持 .env 文件或系统环境变量
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
 
 # 可用模型: qwen-turbo (快速), qwen-plus (增强), qwen-max (最强)
-OPENAI_MODEL = "qwen-max"
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "qwen-max")
 
 
 # ========== 服务配置 ==========

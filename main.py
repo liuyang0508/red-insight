@@ -3,6 +3,10 @@ Red Insight - 小红书智能洞察 Agent
 FastAPI 后端服务
 支持：榜单分析、地区统计、智能攻略、量化报表等
 """
+# 加载环境变量（必须在其他导入之前）
+from dotenv import load_dotenv
+load_dotenv()
+
 import os
 import time
 from fastapi import FastAPI, HTTPException, Request

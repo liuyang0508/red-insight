@@ -38,8 +38,10 @@ env/
 logs/*.log
 *.log
 
-# Local config (包含敏感信息)
-# config.py  # 如果包含敏感信息可取消注释
+# Environment variables (包含敏感信息)
+.env
+.env.local
+.env.*.local
 
 # Docker
 .docker/
